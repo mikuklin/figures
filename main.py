@@ -1,26 +1,26 @@
-import os #для работы с файлами
+import os 
 import random 
-from tqdm import tqdm #для красивой полосочки
+from tqdm import tqdm 
 
 import numpy as np
-from sklearn.model_selection import train_test_split #разделение на train и val
+from sklearn.model_selection import train_test_split 
 
-import cv2 #для работы с картинкасми 
+import cv2
 
-import torch #для работы с тензорами и для обучения модели
+import torch 
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 
-import albumentations as A #для аугментации данных
+import albumentations as A 
 from albumentations.pytorch import ToTensorV2
 
-import matplotlib.pyplot as plt #для графиков
+import matplotlib.pyplot as plt 
 import seaborn as sns
 
 
-class CNN(nn.Module): #сверточная сеть, которую мы будем обучать
+class CNN(nn.Module): 
 
     def __init__(self):
         super().__init__()
@@ -41,7 +41,7 @@ class CNN(nn.Module): #сверточная сеть, которую мы буд
         return torch.sigmoid(x).flatten()
 
 
-class RectsTriags(Dataset): #кастомный датасет
+class RectsTriags(Dataset): 
     def __init__(self, images_filepaths, transform=None):
         self.images_filepaths = images_filepaths
         self.transform = transform
@@ -61,24 +61,24 @@ class RectsTriags(Dataset): #кастомный датасет
             image = self.transform(image=image)["image"]
         return image, label
 
-train_transform = A.Compose( #аугментация обучающей выборки
+train_transform = A.Compose(
     [
-        A.SafeRotate(p=1), #повороты
-        A.HorizontalFlip(p=0.5), #перевороты
+        A.SafeRotate(p=1), 
+        A.HorizontalFlip(p=0.5),
         A.VerticalFlip(p=0.5),
-        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)), #нормализация
-        ToTensorV2() #приведение к тензору
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)), 
+        ToTensorV2() 
     ]
 )
 
-val_transform = A.Compose( #аугментация валидационной выборки
+val_transform = A.Compose( 
     [
-        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)), #нормализация
-        ToTensorV2() #приведение к тензору
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)), 
+        ToTensorV2() 
     ]
 )
 
-def get_paths(): #получаем пути картинок
+def get_paths():
 
     rects_path = './rects/'
     triags_path = './triags/'
@@ -105,7 +105,7 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 train_loss = []
 val_loss = []
 
-for epoch in tqdm(range(epoches)): #обучаем модель
+for epoch in tqdm(range(epoches)): 
     model.train()
     epoch_loss = []
 
@@ -130,7 +130,7 @@ for epoch in tqdm(range(epoches)): #обучаем модель
 print('Finished Training')
 
 model.eval()
-with torch.no_grad(): # смотрим точность нашей модели
+with torch.no_grad(): 
     correct = 0
     for X_val, y_val in val_dataloader:
         outputs = model(X_val)
@@ -147,7 +147,7 @@ plt.ylabel("Loss")
 plt.legend()
 plt.show()
 
-while input('Do you want to classify you picture? [y/n] ') == 'y': # тестируем
+while input('Do you want to classify you picture? [y/n] ') == 'y': 
     os.system("python draw.py")
     path =  './myfig/'
     fig_name = os.listdir(path)
